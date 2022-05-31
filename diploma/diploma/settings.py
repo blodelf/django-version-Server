@@ -78,9 +78,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'diplomadata',
-        'USER': 'root',
-        'PASSWORD': 'q1w2e3r4',
-        'HOST': 'localhost',
+        'USER': 'diploma',
+        'PASSWORD': 'rp5SDFzk86Yn8i9r3NRX6s6Z',
+        'HOST': '127.0.0.1',
         'PORT': '3306',
     }
 }
