@@ -77,6 +77,8 @@ class change_passForm(forms.Form):
     repassword = forms.CharField(widget=forms.PasswordInput())
 
 
+class remindpass(forms.Form):
+    login = forms.CharField(label='Login', max_length=100)
 
 
 class faculty_allForm(ModelForm):

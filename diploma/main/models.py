@@ -186,8 +186,10 @@ class users_all(models.Model):
     def adminRole(self):
         print("===================================================================")
         print(self)
-        if(self == '1' or self == '2'):
+        if(self == '1'):
             return 1
+        elif(self == '2'):
+            return 2
         elif (self == '3'):
             return 3
 

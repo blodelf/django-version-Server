@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-q**1thi*qeo4c$qjb8us*n0^8^(72)ktf(j32%3^mxnj@6hg!y'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -78,9 +78,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'diplomadata',
-        'USER': 'diploma',
-        'PASSWORD': 'rp5SDFzk86Yn8i9r3NRX6s6Z',
-        'HOST': '127.0.0.1',
+        'USER': 'root',
+        'PASSWORD': 'q1w2e3r4',
+        'HOST': 'localhost',
         'PORT': '3306',
     }
 }
