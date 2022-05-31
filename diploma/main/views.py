@@ -18,6 +18,40 @@ def generatePass():
     return passwd
 
 
+def delete_cookies():
+    responce = HttpResponseRedirect(reverse('login'))
+    responce.delete_cookie('username')
+    responce.delete_cookie('login_status')
+    responce.delete_cookie('iqlvl')
+    return responce
+
+
+def create_cookies(request, n, login):
+    response = render(request, 'main/index.html')
+    response.set_cookie('username', login, expires=datetime.utcnow() + timedelta(hours=1))
+    response.set_cookie('login_status', True, expires=datetime.utcnow() + timedelta(hours=1))
+    response.set_cookie('iqlvl', n, expires=datetime.utcnow() + timedelta(hours=1))
+    return response
+
+
+def check_cookies(login, status):
+    logD = users_all.objects.all()
+    checklogin = False
+    checkSession = False
+    for el in logD:
+        if el.login == login:
+            checklogin = True
+            break
+    if status:
+        checkSession = True
+    if checklogin and checkSession:
+        return True
+    else:
+        return False
+
+
+
+
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     if x_forwarded_for:
@@ -28,14 +62,16 @@ def get_client_ip(request):
 
 
 def index(request):
-    if 'login_status' in request.COOKIES and 'username' in request.COOKIES and request.COOKIES.get('iqlvl') == '3':
+    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status'))\
+            and request.COOKIES.get('iqlvl') == '3':
         return render(request, 'main/index.html')
     else:
-        return redirect('login')
+        return delete_cookies()
 
 
 def register(request):
-    if 'login_status' in request.COOKIES and 'username' in request.COOKIES and request.COOKIES.get('iqlvl') == '3':
+    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status'))\
+            and request.COOKIES.get('iqlvl') == '3':
         error = ""
         if request.method == "POST":
             form = userAllForm(request.POST)
@@ -117,11 +153,12 @@ def register(request):
         return render(request, 'main/registration.html', data)
 
     else:
-        return redirect('login')
+        return delete_cookies()
 
 
 def find(request):
-    if 'login_status' in request.COOKIES and 'username' in request.COOKIES and request.COOKIES.get('iqlvl') == '3':
+    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status'))\
+            and request.COOKIES.get('iqlvl') == '3':
         users = ""
         error = ""
         if request.method == "POST":
@@ -154,12 +191,13 @@ def find(request):
         }
         return render(request, 'main/userfind.html', data)
     else:
-        return redirect('login')
+        return delete_cookies()
 
 
 def termlonger(request):
     error = ""
-    if 'login_status' in request.COOKIES and 'username' in request.COOKIES and request.COOKIES.get('iqlvl') == '3':
+    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status'))\
+            and request.COOKIES.get('iqlvl') == '3':
         if request.method == "POST":
             form = userAllForm(request.POST)
             users = users_all.search_all(users_all.objects.filter(login=form.data["login"]))
@@ -192,11 +230,11 @@ def termlonger(request):
         }
         return render(request, 'main/termlonger.html', data)
     else:
-        return redirect('login')
+        return delete_cookies()
 
 
 def changepass(request):
-    if 'login_status' in request.COOKIES and 'username' in request.COOKIES and request.COOKIES.get('iqlvl') == '3':
+    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status')) and request.COOKIES.get('iqlvl') == '3':
         success = ""
         if request.method == "POST":
             form = userAllForm(request.POST)
@@ -227,12 +265,11 @@ def changepass(request):
         }
         return render(request, 'main/changepass.html', data)
     else:
-        return redirect('login')
+        return delete_cookies()
 
 
 def change_own_pass(request):
-    if 'login_status' in request.COOKIES and 'username' in request.COOKIES and (request.COOKIES.get('iqlvl') == '2' or
-                                                                                request.COOKIES.get('iqlvl') == '3'):
+    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status')) and request.COOKIES.get('iqlvl') == '3':
         success = ""
         if request.method == "POST":
             form = userAllForm(request.POST)
@@ -265,11 +302,11 @@ def change_own_pass(request):
         return render(request, 'main/ownchangepass.html', data)
 
     else:
-        return redirect('login')
+        return delete_cookies()
 
 
 def changeownpassuser(request):
-    if 'login_status' in request.COOKIES and 'username' in request.COOKIES and request.COOKIES.get('iqlvl') == '2':
+    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status')) and request.COOKIES.get('iqlvl') == '2':
         success = ""
         if request.method == "POST":
             form = userAllForm(request.POST)
@@ -301,11 +338,12 @@ def changeownpassuser(request):
         return render(request, 'main/ownchangepassuser.html', data)
 
     else:
-        return redirect('login')
+        return delete_cookies()
 
 
 def history(request):
-    if 'login_status' in request.COOKIES and 'username' in request.COOKIES and request.COOKIES.get('iqlvl') == '3':
+    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status'))\
+            and request.COOKIES.get('iqlvl') == '3':
         info = []
         error = ""
         if request.method == "POST":
@@ -342,11 +380,11 @@ def history(request):
         }
         return render(request, 'main/history.html', data)
     else:
-        return redirect('login')
+        return delete_cookies()
 
 
 def login(request):
-    if not 'login_status' in request.COOKIES and not 'username' in request.COOKIES:
+    if not check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status')):
         info = ""
         if request.method == "GET":
             form = userAllForm()
@@ -368,17 +406,9 @@ def login(request):
                     if check_password(password, el.passwd):
                         if el.exp_date.timestamp() > datetime.now().timestamp():
                             if el.admin_level >= 3:
-                                response = render(request, 'main/index.html')
-                                response.set_cookie('username', login)
-                                response.set_cookie('login_status', True)
-                                response.set_cookie('iqlvl', el.admin_level)
-                                return response
+                                return create_cookies(request, el.admin_level, login)
                             elif el.admin_level == 2:
-                                response = render(request, 'main/user_home.html')
-                                response.set_cookie('username', login)
-                                response.set_cookie('login_status', True)
-                                response.set_cookie('iqlvl', el.admin_level)
-                                return response
+                                return create_cookies(request, el.admin_level, login)
                             else:
                                 info = "У вас недостатньо прав на вхід."
                                 break
@@ -407,7 +437,7 @@ def login(request):
 
 
 def remind_password(request):
-    if not 'login_status' in request.COOKIES and not 'username' in request.COOKIES:
+    if not check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status')):
         info = ""
         if request.method == "POST":
             form = remindpass(request.POST)
@@ -451,14 +481,15 @@ def remind_password(request):
 
 
 def userhome(request):
-    if 'login_status' in request.COOKIES and 'username' in request.COOKIES and request.COOKIES.get('iqlvl') == '2':
+    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status')) and request.COOKIES.get('iqlvl') == '2':
         return render(request, 'main/user_home.html')
     else:
-        return redirect('login')
+        return delete_cookies()
 
 
 def findstuff(request):
-    if 'login_status' in request.COOKIES and 'username' in request.COOKIES and request.COOKIES.get('iqlvl') == '2':
+    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status'))\
+            and request.COOKIES.get('iqlvl') == '2':
         users = ""
         error = ""
         if request.method == "POST":
@@ -490,12 +521,8 @@ def findstuff(request):
         }
         return render(request, 'main/userfind_user.html', data)
     else:
-        return redirect('login')
+        return delete_cookies()
 
 
 def logout(request):
-    responce = HttpResponseRedirect(reverse('login'))
-    responce.delete_cookie('username')
-    responce.delete_cookie('login_status')
-    responce.delete_cookie('iqlvl')
-    return responce
+    return delete_cookies()
