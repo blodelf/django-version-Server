@@ -17,5 +17,6 @@ urlpatterns = [
     path('find_stuff', views.findstuff, name="findstuff"),
     path('uhome', views.userhome, name="user_home"),
     path('ownchangepass', views.change_own_pass, name="ownchangepass"),
-    path('uownchangepass', views.changeownpassuser, name="uownchangepass")
+    path('uownchangepass', views.changeownpassuser, name="uownchangepass"),
+    path('remindpass', views.remind_password, name="remindpass")
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

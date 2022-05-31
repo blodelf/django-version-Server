@@ -88,10 +88,8 @@ class users_history(models.Model):
     ip = models.TextField("ip", max_length=15, blank=True)
 
     def history_user(self):
-        print(type(self))
         user = []
         for i in self:
-            print(i)
             user.append({
                 "id": i.id,
                 "date": i.date,
@@ -165,10 +163,8 @@ class users_all(models.Model):
     admin_level = models.IntegerField("admin_level", default="1", blank=True)
 
     def search_all(self) -> object:
-        print(type(self))
         user = []
         for i in self:
-            print(i)
             user.append({
                 "login": i.login,
                 "fname": i.fname,
@@ -178,14 +174,13 @@ class users_all(models.Model):
                 "state": i.state,
                 "id": i.id,
                 "passwd": i.passwd,
-                "email": i.email
+                "email": i.email,
+                "document_id": i.document_id
             })
         #user = self
         return user
 
     def adminRole(self):
-        print("===================================================================")
-        print(self)
         if(self == '1'):
             return 1
         elif(self == '2'):

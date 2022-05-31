@@ -1,7 +1,7 @@
 from django.contrib.auth.hashers import make_password, check_password
 from django.shortcuts import render, redirect, reverse
 from .models import users_all, faculty_all, title_all, users_history
-from .forms import userAllForm, change_passForm
+from .forms import userAllForm, change_passForm, remindpass
 # Create your views here.
 from django.http import HttpResponseRedirect
 from datetime import datetime, timedelta
@@ -185,7 +185,6 @@ def termlonger(request):
                     error = "Уведіть правильну дату"
             else:
                 error = "Уведіть правильний логін"
-
         form = userAllForm()
         data = {
             'form': form,
@@ -227,34 +226,36 @@ def changepass(request):
             'success': success
         }
         return render(request, 'main/changepass.html', data)
-
     else:
         return redirect('login')
 
 
 def change_own_pass(request):
     if 'login_status' in request.COOKIES and 'username' in request.COOKIES and (request.COOKIES.get('iqlvl') == '2' or
-            request.COOKIES.get('iqlvl') == '3'):
+                                                                                request.COOKIES.get('iqlvl') == '3'):
         success = ""
         if request.method == "POST":
             form = userAllForm(request.POST)
             users = users_all.search_all(users_all.objects.filter(login=request.COOKIES.get('username')))
-            if (form.data["password"] == form.data["repassword"]):
-                password = form.data["password"]
-                password = make_password(password)
-                user = users_all(id=users[0]["id"])
-                user.passwd = password
-                success = "Пароль успішно змінено"
-                history = users_history()
-                history.user_id = users[0]["id"]
-                history.date = datetime.now()
-                history.action = "CHPASS"
-                history.creator = request.COOKIES.get('username')
-                history.ip = get_client_ip(request)
-                history.save()
-                user.save(update_fields=['passwd'])
+            if form.data["password"] == form.data["repassword"]:
+                if (len(form.data["password"]) >= 8):
+                    password = form.data["password"]
+                    password = make_password(password)
+                    user = users_all(id=users[0]["id"])
+                    user.passwd = password
+                    success = "Пароль успішно змінено."
+                    history = users_history()
+                    history.user_id = users[0]["id"]
+                    history.date = datetime.now()
+                    history.action = "CHPASS"
+                    history.creator = request.COOKIES.get('username')
+                    history.ip = get_client_ip(request)
+                    history.save()
+                    user.save(update_fields=['passwd'])
+                else:
+                    success = "У паролі повинно бути хоча б 8 символів."
             else:
-                success = "Паролі не співпадають"
+                success = "Паролі не співпадають."
         form = change_passForm()
         data = {
             'form': form,
@@ -274,19 +275,22 @@ def changeownpassuser(request):
             form = userAllForm(request.POST)
             users = users_all.search_all(users_all.objects.filter(login=request.COOKIES.get('username')))
             if (form.data["password"] == form.data["repassword"]):
-                password = form.data["password"]
-                password = make_password(password)
-                user = users_all(id=users[0]["id"])
-                user.passwd = password
-                success = "Пароль успішно змінено"
-                history = users_history()
-                history.user_id = users[0]["id"]
-                history.date = datetime.now()
-                history.action = "CHPASS"
-                history.creator = request.COOKIES.get('username')
-                history.ip = get_client_ip(request)
-                history.save()
-                user.save(update_fields=['passwd'])
+                if (len(form.data["password"]) >= 8):
+                    password = form.data["password"]
+                    password = make_password(password)
+                    user = users_all(id=users[0]["id"])
+                    user.passwd = password
+                    success = "Пароль успішно змінено."
+                    history = users_history()
+                    history.user_id = users[0]["id"]
+                    history.date = datetime.now()
+                    history.action = "CHPASS"
+                    history.creator = request.COOKIES.get('username')
+                    history.ip = get_client_ip(request)
+                    history.save()
+                    user.save(update_fields=['passwd'])
+                else:
+                    success = "У паролі повинно бути хоча б 8 символів."
             else:
                 success = "Паролі не співпадають"
         form = change_passForm()
@@ -401,38 +405,49 @@ def login(request):
             response = redirect('uhome')
             return response
 
-"""def remind_password(request):
+
+def remind_password(request):
     if not 'login_status' in request.COOKIES and not 'username' in request.COOKIES:
         info = ""
-        if request.method == "GET":
-            form = userAllForm()
+        if request.method == "POST":
+            form = remindpass(request.POST)
+            users = users_all.search_all(users_all.objects.filter(login=form.data["login"]))
+            login = form.data["login"]
+            id_document = form.data["document_id"]
+            logD = users_all.objects.all()
+            if login != "":
+                for el in logD:
+                    if id_document != "":
+                        if login == el.login:
+                            if id_document == el.document_id:
+                                generated_pass = generatePass()
+                                r = requests.get(
+                                    f"https://api.unisender.com/ru/api/sendEmail?format=json&api_key=6q6o8ud7w8sxs67oga6wedpichx4xogxr8x18uqe&email={users[0]['email']}&sender_name=Support&sender_email=botcreationlab@gmail.com&subject=Your new password.&body=Your new password: {generated_pass}&list_id=1")
+                                return redirect('login')
+                            else:
+                                info = "Не правильний номер залікової книги."
+                        else:
+                            info = "Такого логіну не існує."
+                    else:
+                        info = "Ви не ввели номер залікової книги."
+            else:
+                info = "Ви не ввели логін."
             data = {
                 'form': form,
                 'info': info
             }
-            response = render(request, 'main/login.html', data)
+            response = render(request, 'main/remind_password.html', data)
             return response
-
-        if request.method == "POST":
-            form = userAllForm(request.POST)
-            login = form.data["login"]
-            logD = users_all.objects.all()
-            for el in logD:
-                if login == el.login:
-
-                else:
-                    info = "Такого логіну не існує"
-        form = userAllForm()
+        form = remindpass()
         data = {
             'form': form,
             'info': info
         }
-        response = render(request, 'main/login.html', data)
+        response = render(request, 'main/remind_password.html', data)
         return response
     else:
-        response = render(request, 'main/index.html')
+        response = redirect('login')
         return response
-"""
 
 
 def userhome(request):
@@ -440,7 +455,6 @@ def userhome(request):
         return render(request, 'main/user_home.html')
     else:
         return redirect('login')
-
 
 
 def findstuff(request):
