@@ -18,6 +18,14 @@ def generatePass():
     return passwd
 
 
+def generateTestCode():
+    passwd = ''
+    for x in range(5):
+        passwd = passwd + random.choice(list(
+            '1234567890/'))
+    return passwd
+
+
 def delete_cookies():
     responce = HttpResponseRedirect(reverse('login'))
     responce.delete_cookie('username')
@@ -26,8 +34,8 @@ def delete_cookies():
     return responce
 
 
-def create_cookies(request, n, login):
-    response = render(request, 'main/index.html')
+def create_cookies(request, n, login, path, data):
+    response = render(request, path, data)
     response.set_cookie('username', login, expires=datetime.utcnow() + timedelta(hours=1))
     response.set_cookie('login_status', True, expires=datetime.utcnow() + timedelta(hours=1))
     response.set_cookie('iqlvl', n, expires=datetime.utcnow() + timedelta(hours=1))
@@ -50,8 +58,6 @@ def check_cookies(login, status):
         return False
 
 
-
-
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     if x_forwarded_for:
@@ -62,15 +68,17 @@ def get_client_ip(request):
 
 
 def index(request):
-    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status'))\
+    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status')) \
             and request.COOKIES.get('iqlvl') == '3':
-        return render(request, 'main/index.html')
+        data = {}
+        return create_cookies(request, request.COOKIES.get('iqlvl'), request.COOKIES.get('username'), 'main/index.html',
+                              data)
     else:
         return delete_cookies()
 
 
 def register(request):
-    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status'))\
+    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status')) \
             and request.COOKIES.get('iqlvl') == '3':
         error = ""
         if request.method == "POST":
@@ -143,21 +151,23 @@ def register(request):
                 'form': form,
                 'error': error
             }
-            return render(request, 'main/registration.html', data)
+            return create_cookies(request, request.COOKIES.get('iqlvl'), request.COOKIES.get('username'),
+                                  'main/registration.html', data)
 
         form = userAllForm()
         data = {
             'form': form,
             'error': error
         }
-        return render(request, 'main/registration.html', data)
+        return create_cookies(request, request.COOKIES.get('iqlvl'), request.COOKIES.get('username'),
+                              'main/registration.html', data)
 
     else:
         return delete_cookies()
 
 
 def find(request):
-    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status'))\
+    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status')) \
             and request.COOKIES.get('iqlvl') == '3':
         users = ""
         error = ""
@@ -179,7 +189,8 @@ def find(request):
                     'info': users,
                     'error': error
                 }
-                return render(request, 'main/userfind.html', data)
+                return create_cookies(request, request.COOKIES.get('iqlvl'), request.COOKIES.get('username'),
+                                      'main/userfind.html', data)
             else:
                 error = "Уведіть хоча б один із пунктів для пошуку"
 
@@ -189,14 +200,15 @@ def find(request):
             'info': users,
             'error': error
         }
-        return render(request, 'main/userfind.html', data)
+        return create_cookies(request, request.COOKIES.get('iqlvl'), request.COOKIES.get('username'),
+                              'main/userfind.html', data)
     else:
         return delete_cookies()
 
 
 def termlonger(request):
     error = ""
-    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status'))\
+    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status')) \
             and request.COOKIES.get('iqlvl') == '3':
         if request.method == "POST":
             form = userAllForm(request.POST)
@@ -228,13 +240,15 @@ def termlonger(request):
             'form': form,
             'error': error
         }
-        return render(request, 'main/termlonger.html', data)
+        return create_cookies(request, request.COOKIES.get('iqlvl'), request.COOKIES.get('username'),
+                              'main/termlonger.html', data)
     else:
         return delete_cookies()
 
 
 def changepass(request):
-    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status')) and request.COOKIES.get('iqlvl') == '3':
+    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status')) and request.COOKIES.get(
+            'iqlvl') == '3':
         success = ""
         if request.method == "POST":
             form = userAllForm(request.POST)
@@ -263,13 +277,15 @@ def changepass(request):
             'form': form,
             'success': success
         }
-        return render(request, 'main/changepass.html', data)
+        return create_cookies(request, request.COOKIES.get('iqlvl'), request.COOKIES.get('username'),
+                              'main/changepass.html', data)
     else:
         return delete_cookies()
 
 
 def change_own_pass(request):
-    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status')) and request.COOKIES.get('iqlvl') == '3':
+    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status')) and request.COOKIES.get(
+            'iqlvl') == '3':
         success = ""
         if request.method == "POST":
             form = userAllForm(request.POST)
@@ -299,14 +315,16 @@ def change_own_pass(request):
             'success': success,
             'iqlvl': request.COOKIES.get('iqlvl')
         }
-        return render(request, 'main/ownchangepass.html', data)
+        return create_cookies(request, request.COOKIES.get('iqlvl'), request.COOKIES.get('username'),
+                              'main/ownchangepass.html', data)
 
     else:
         return delete_cookies()
 
 
 def changeownpassuser(request):
-    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status')) and request.COOKIES.get('iqlvl') == '2':
+    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status')) and request.COOKIES.get(
+            'iqlvl') == '2':
         success = ""
         if request.method == "POST":
             form = userAllForm(request.POST)
@@ -335,14 +353,15 @@ def changeownpassuser(request):
             'form': form,
             'success': success
         }
-        return render(request, 'main/ownchangepassuser.html', data)
+        return create_cookies(request, request.COOKIES.get('iqlvl'), request.COOKIES.get('username'),
+                              'main/ownchangepassuser.html', data)
 
     else:
         return delete_cookies()
 
 
 def history(request):
-    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status'))\
+    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status')) \
             and request.COOKIES.get('iqlvl') == '3':
         info = []
         error = ""
@@ -378,14 +397,18 @@ def history(request):
             'info': info,
             'error': error
         }
-        return render(request, 'main/history.html', data)
+        return create_cookies(request, request.COOKIES.get('iqlvl'), request.COOKIES.get('username'),
+                              'main/history.html', data)
     else:
         return delete_cookies()
 
 
 def login(request):
     if not check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status')):
-        info = ""
+        if 'timePass' in request.COOKIES:
+            info = "Перевірте тимчасовий пароль на пошті"
+        else:
+            info = ""
         if request.method == "GET":
             form = userAllForm()
             data = {
@@ -397,18 +420,21 @@ def login(request):
 
         if request.method == "POST":
             form = userAllForm(request.POST)
+            data = {
+
+            }
             login = form.data["login"]
             password = form.data["passwd"]
             users = users_all.search_all(users_all.objects.filter(login=form.data["login"]))
             logD = users_all.objects.all()
             for el in logD:
                 if login == el.login:
-                    if check_password(password, el.passwd):
+                    if check_password(password, el.passwd) or check_password(password, request.COOKIES.get('timePass')):
                         if el.exp_date.timestamp() > datetime.now().timestamp():
                             if el.admin_level >= 3:
-                                return create_cookies(request, el.admin_level, login)
+                                return create_cookies(request, el.admin_level, login, 'main/index.html', data)
                             elif el.admin_level == 2:
-                                return create_cookies(request, el.admin_level, login)
+                                return create_cookies(request, el.admin_level, login, 'main/user_home.html', data)
                             else:
                                 info = "У вас недостатньо прав на вхід."
                                 break
@@ -439,6 +465,7 @@ def login(request):
 def remind_password(request):
     if not check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status')):
         info = ""
+        test_code = generateTestCode()
         if request.method == "POST":
             form = remindpass(request.POST)
             users = users_all.search_all(users_all.objects.filter(login=form.data["login"]))
@@ -447,33 +474,49 @@ def remind_password(request):
             logD = users_all.objects.all()
             if login != "":
                 for el in logD:
-                    if id_document != "":
-                        if login == el.login:
-                            if id_document == el.document_id:
-                                generated_pass = generatePass()
-                                r = requests.get(
-                                    f"https://api.unisender.com/ru/api/sendEmail?format=json&api_key=6q6o8ud7w8sxs67oga6wedpichx4xogxr8x18uqe&email={users[0]['email']}&sender_name=Support&sender_email=botcreationlab@gmail.com&subject=Your new password.&body=Your new password: {generated_pass}&list_id=1")
-                                return redirect('login')
-                            else:
-                                info = "Не правильний номер залікової книги."
+                    if login == el.login:
+                        if check_password(id_document, request.COOKIES.get('testCode')):
+                            form = userAllForm()
+                            info = "Тимчасовий пароль повинен бути у вас на пошті"
+                            data = {
+                                'form': form,
+                                'info': info
+                            }
+                            generated_pass = generatePass()
+                            response = redirect('login')
+                            response.set_cookie('timePass', make_password(generated_pass),
+                                                expires=datetime.utcnow() + timedelta(minutes=5))
+                            r = requests.get(
+                                f"https://api.unisender.com/ru/api/sendEmail?format=json&api_key=6q6o8ud7w8sxs67oga6wedpichx4xogxr8x18uqe&email={users[0]['email']}&sender_name=Support&sender_email=botcreationlab@gmail.com&subject=Your new password.&body=Your new password: {generated_pass}&list_id=1")
+                            return response
                         else:
-                            info = "Такого логіну не існує."
+                            info = "Не правильно набраний код."
+                            break
                     else:
-                        info = "Ви не ввели номер залікової книги."
+                        info = "Такого логіну не існує."
             else:
                 info = "Ви не ввели логін."
+            test_code = generateTestCode()
+            _mutable = form.data._mutable
+            form.data._mutable = True
+            form.data["document_id"] = ""
+            form.data._mutable = _mutable
             data = {
                 'form': form,
-                'info': info
+                'info': info,
+                'test': test_code
             }
             response = render(request, 'main/remind_password.html', data)
+            response.set_cookie('testCode', make_password(test_code), expires=datetime.utcnow() + timedelta(minutes=2))
             return response
         form = remindpass()
         data = {
             'form': form,
-            'info': info
+            'info': info,
+            'test': test_code
         }
         response = render(request, 'main/remind_password.html', data)
+        response.set_cookie('testCode', make_password(test_code), expires=datetime.utcnow() + timedelta(minutes=2))
         return response
     else:
         response = redirect('login')
@@ -481,14 +524,17 @@ def remind_password(request):
 
 
 def userhome(request):
-    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status')) and request.COOKIES.get('iqlvl') == '2':
-        return render(request, 'main/user_home.html')
+    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status')) and request.COOKIES.get(
+            'iqlvl') == '2':
+        data = {}
+        return create_cookies(request, request.COOKIES.get('iqlvl'), request.COOKIES.get('username'),
+                              'main/user_home.html', data)
     else:
         return delete_cookies()
 
 
 def findstuff(request):
-    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status'))\
+    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status')) \
             and request.COOKIES.get('iqlvl') == '2':
         users = ""
         error = ""
@@ -509,7 +555,8 @@ def findstuff(request):
                     'info': users,
                     'error': error
                 }
-                return render(request, 'main/userfind_user.html', data)
+                return create_cookies(request, request.COOKIES.get('iqlvl'), request.COOKIES.get('username'),
+                                      'main/userfind_user.html', data)
             else:
                 error = "Уведіть хоча б один із пунктів для пошуку"
 
@@ -519,7 +566,8 @@ def findstuff(request):
             'info': users,
             'error': error
         }
-        return render(request, 'main/userfind_user.html', data)
+        return create_cookies(request, request.COOKIES.get('iqlvl'), request.COOKIES.get('username'),
+                              'main/userfind_user.html', data)
     else:
         return delete_cookies()
 
