@@ -1,6 +1,6 @@
 from django.contrib.auth.hashers import make_password, check_password
 from django.shortcuts import render, redirect, reverse
-from .models import users_all, faculty_all, title_all, users_history
+from .models import users_all, users_history
 from .forms import userAllForm, change_passForm, remindpass
 # Create your views here.
 from django.http import HttpResponseRedirect
