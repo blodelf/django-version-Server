@@ -1,75 +1,90 @@
-from .models import users_all, faculty_all
+from .models import UsersAll, FacultyAll, AccessGroup, UsersAccessGroup, TitleAll, DeptAll
 from django.forms import ModelForm, TextInput, ChoiceField
 from django import forms
 
 
-class userAllForm(ModelForm):
+class userAllForm(forms.Form):
     use_required_attribute = False
-
-    class Meta:
-        model = users_all
-        fields = [
-            "dept_id", "state", "login", "passwd",
-            "fname", "lname", "mname", "contr_quest", "contr_answ",
-            "title", "email", "phone", "exp_date", "welcome_msg",
-            "admin", "document_id", "creator",
-            "operator", "mgroup_id", "title_id", "admin_level"
-        ]
-        widgets = {
-            "exp_date": TextInput(attrs={
-                'type':'text',
-                'class':'form-control',
-                'id':'datepicker-example'
-            }),
-            "login" : TextInput(attrs={
-                'required': False,
-                'id': "crit"
-            }),
-            "document_id": TextInput(attrs={
-                'required': False,
-                'id': "crit"
-            }),
-            "passwd": TextInput(attrs={
-                'required': False,
-                'type': 'password',
-                'id': "crit"
-            }),
-            "lname": TextInput(attrs={
-                'required':False,
-                'id': "crit"
-            }),
-            "fname": TextInput(attrs={
-                'required':False,
-                'id': "crit"
-            }),
-            "mname": TextInput(attrs={
-                'required':False,
-                'id': "crit"
-            }),
-
-
-
-            "contr_quest": TextInput(attrs={
-                'required':False
-            }),
-            "contr_answ": TextInput(attrs={
-                'required':False
-            }),
-            "title": TextInput(attrs={
-                'required':False
-            }),
-            "welcome_msg": TextInput(attrs={
-                'required': False
-            }),
-            "phone": TextInput(attrs={
-                'required': False
-            }),
-            "email": TextInput(attrs={
-                'required': False,
-                'id': "email"
-            })
-        }
-
+    dept_id = forms.ModelChoiceField(queryset=DeptAll.objects.all())
+    states = [
+        ('OPEN', 'OPEN'),
+        ('CLOSED', 'CLOSED')
+    ]
+    state = forms.CharField(widget=forms.Select(choices=states))
+    login = forms.CharField(max_length=16, widget=forms.TextInput(
+        attrs={
+            'required': False,
+            'id': "crit"
+        }))
+    passwd = forms.CharField(max_length=40, widget=forms.PasswordInput)
+    fname = forms.CharField(max_length=50, widget=forms.TextInput(
+        attrs={
+            'required': False,
+            'id': "crit"
+        }))
+    lname = forms.CharField(max_length=50, widget=forms.TextInput(
+        attrs={
+            'required': False,
+            'id': "crit"
+        }))
+    mname = forms.CharField(max_length=50, widget=forms.TextInput(
+        attrs={
+            'required': False,
+            'id': "crit"
+        }))
+    contr_quest = forms.CharField(max_length=255, widget=forms.TextInput(
+        attrs={
+            'required': False
+        }))
+    contr_answ = forms.CharField(max_length=255, widget=forms.TextInput(
+        attrs={
+            'required': False
+        }))
+    title = forms.CharField(max_length=30, widget=forms.TextInput(
+        attrs={
+            'required': False
+        }))
+    email = forms.CharField(max_length=50, widget=forms.TextInput(
+        attrs={
+            'required': False,
+            'id': "email"
+        }))
+    phone = forms.CharField(max_length=20, widget=forms.TextInput(
+        attrs={
+            'required': False
+        }))
+    exp_date = forms.DateTimeField(widget=forms.PasswordInput(
+        attrs={
+            'type': 'text',
+            'class': 'form-control',
+            'id': 'datepicker-example'
+        }))
+    welcome_msg = forms.CharField(max_length=255, widget=forms.TextInput(
+        attrs={
+            'required': False
+        }))
+    admins = [
+        ("n", "n"),
+        ("y", "y")
+    ]
+    admin = forms.CharField(widget=forms.Select(choices=admins))
+    document_id = forms.CharField(max_length=16, widget=forms.TextInput(
+        attrs={
+            'required': False,
+            'id': "crit"
+        }))
+    creator = forms.CharField(max_length=16, widget=forms.TextInput(
+        attrs={
+            'required': False
+        }))
+    operators = [
+        ("n", "n"),
+        ("y", "y")
+    ]
+    operator = forms.CharField(widget=forms.Select(choices=operators))
+    mgroup_id = forms.IntegerField()
+    title_id = forms.ModelChoiceField(queryset=TitleAll.objects.all())
+    admin_level = forms.IntegerField()
 
 class change_passForm(forms.Form):
     login = forms.CharField(label='Login', max_length=100)
@@ -85,13 +100,25 @@ class remindpass(forms.Form):
     }))
 
 
-
-class faculty_allForm(ModelForm):
+class FacultyAllForm(ModelForm):
     class Meta:
-        facultets = faculty_all.objects.all()
+        facultets = FacultyAll.objects.all()
         CHOICES = []
         for el in facultets:
-            CHOICES.append([el.faculty,el.faculty])
+            CHOICES.append([el.faculty, el.faculty])
 
         fields = ChoiceField(choices=CHOICES)
+
+
+class usersupdateform(forms.ModelForm):
+    class Meta:
+        model = UsersAll
+        fields = '__all__'
+
+
+class Users_access_group_form(ModelForm):
+    class Meta:
+        model = UsersAccessGroup
+        fields = ['user', 'group', 'desc']
+
 
