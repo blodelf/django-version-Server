@@ -127,7 +127,6 @@ def register(request):
             password = hashMDPass(password)
             form.data["passwd"] = password
             form.data._mutable = _mutable
-            print(form.data)
             if (form.data["login"] != "" and form.data["login"] != "-"):
                 if (form.data["document_id"] != "" and form.data["login"] != "-"):
                     if (form.data["lname"] != "" and form.data["login"] != "-"):
@@ -209,8 +208,6 @@ def register(request):
             req_params = ['login', 'document_id', 'lname', 'fname', 'mname', 'email']
             tables = []
             for i in req_params:
-                print(i)
-                print(form.data[i])
                 if form.data[i] == '':
                     tables.append(i)
 
@@ -260,7 +257,7 @@ def find(request):
                             .filter(lname__icontains=form.data["lname"].encode('cp1251').decode('latin-1'))
                             .filter(mname__icontains=form.data["mname"].encode('cp1251').decode('latin-1'))
                             .filter(email__icontains=form.data["email"])
-                            .filter(dept_id = UsersAll.objects.get(login = request.COOKIES.get('username')).dept_id))
+                            .filter(dept_id=UsersAll.objects.get(login=request.COOKIES.get('username')).dept_id))
                 else:
                     users = UsersAll.search_all(
                         UsersAll.objects.filter(fname__icontains=form.data["fname"].encode('cp1251').decode('latin-1'))
@@ -353,7 +350,7 @@ def termlonger(request):
 
 
 def changepass(request):
-    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status'))\
+    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status')) \
             and int(request.COOKIES.get('iqlvl')) >= 2:
         success = ""
         if request.method == "POST":
@@ -391,7 +388,7 @@ def changepass(request):
 
 
 def change_own_pass(request):
-    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status'))\
+    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status')) \
             and int(request.COOKIES.get('iqlvl')) >= 2:
         success = ""
         history = UsersHistory.objects.all()
@@ -431,7 +428,7 @@ def change_own_pass(request):
 
 
 def changeownpassuser(request):
-    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status'))\
+    if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status')) \
             and int(request.COOKIES.get('iqlvl')) == 1:
         success = ""
         if request.method == "POST":
@@ -689,7 +686,7 @@ def findstuff(request):
                         searching_users = []
                         error = "Уточніть запит"
                     else:
-                        for i in range(0,len(users)):
+                        for i in range(0, len(users)):
                             for el in users[i].keys():
                                 if isinstance(users[i][el], str):
                                     users[i][el] = users[i][el].encode('latin-1').decode('cp1251')
@@ -732,7 +729,7 @@ def logout(request):
 def UserUpdateView(request, pk):
     if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status')) \
             and int(request.COOKIES.get('iqlvl')) >= 1:
-        error=""
+        error = ""
         base_template = ""
         if int(request.COOKIES.get('iqlvl')) >= 2:
             base_template = "main/layout.html"
@@ -753,8 +750,10 @@ def UserUpdateView(request, pk):
             check_email = True
             try:
                 if form.data["dept_id"] != "":
-                    if int(form.data["dept_id"]) != int(DeptAll.objects.get(dept_ename=infoAboutUser["dept_id"]).dept_id):
-                        changes.append(f"Dept changed from {DeptAll.objects.get(pk=prevForm['dept_id'])} to {DeptAll.objects.get(pk=int(form.data['dept_id']))}")
+                    if int(form.data["dept_id"]) != int(
+                            DeptAll.objects.get(dept_ename=infoAboutUser["dept_id"]).dept_id):
+                        changes.append(
+                            f"Dept changed from {DeptAll.objects.get(pk=prevForm['dept_id'])} to {DeptAll.objects.get(pk=int(form.data['dept_id']))}")
                         prevForm['dept_id'] = form.data["dept_id"]
             except:
                 pass
@@ -871,8 +870,10 @@ def UserUpdateView(request, pk):
                 pass
             try:
                 if form.data["title_id"] != "":
-                    if int(form.data["title_id"]) != int(TitleAll.objects.get(title_ename=infoAboutUser["title_id"]).title_id):
-                        changes.append(f"Job changed from {TitleAll.objects.get(pk=prevForm['title_id'])} to {TitleAll.objects.get(pk=int(form.data['title_id']))}")
+                    if int(form.data["title_id"]) != int(
+                            TitleAll.objects.get(title_ename=infoAboutUser["title_id"]).title_id):
+                        changes.append(
+                            f"Job changed from {TitleAll.objects.get(pk=prevForm['title_id'])} to {TitleAll.objects.get(pk=int(form.data['title_id']))}")
                         prevForm['title_id'] = form.data["title_id"]
             except:
                 pass
@@ -992,7 +993,7 @@ def mypage(request):
         error = ""
         only_view = True
         template = 'main/user_update.html'
-        pk = UsersAll.objects.get(login = request.COOKIES.get('username')).user_id
+        pk = UsersAll.objects.get(login=request.COOKIES.get('username')).user_id
         get_user = UsersAll.objects.get(pk=pk)
         infoAboutUser = UsersAll.show_all(UsersAll.objects.filter(login=get_user.login))[0]
         infoAboutUser["dept_id"] = DeptAll.objects.get(pk=infoAboutUser["dept_id"])
@@ -1012,16 +1013,14 @@ def mypage(request):
 
     else:
         return delete_cookies()
-   
-    
+
+
 def accesstovpn(request):
     if check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status')) \
             and int(request.COOKIES.get('iqlvl')) >= 4:
         base_template = "main/layout.html"
         error = ""
         template = 'main/VPN.html'
-
-
 
         form = UsersAccessGroup.objects.all()
         groupVPN = []
@@ -1082,9 +1081,13 @@ def addtovpn(request):
                         for el in users:
                             el["dept_id"] = DeptAll.objects.get(dept_id=el["dept_id"])
                             searching_users.append(el)
-                        if UsersAccessGroup.objects.get(user_id=UsersAll.objects.get(login=searching_users[0]["login"])
-                                .user_id).group_id == 1:
-                            btn = True
+                        try:
+                            if UsersAccessGroup.objects.get(
+                                    user_id=UsersAll.objects.get(login=searching_users[0]["login"])
+                                            .user_id).group_id == 1:
+                                btn = True
+                        except:
+                            pass
                 else:
                     error = "За такими данними користувача не знайдено."
 
@@ -1162,9 +1165,12 @@ def addtovpn_noc(request):
                         for el in users:
                             el["dept_id"] = DeptAll.objects.get(dept_id=el["dept_id"])
                             searching_users.append(el)
-                        if UsersAccessGroup.objects.get(user_id=UsersAll.objects.get(login=searching_users[0]["login"])
-                                .user_id).group_id == 2:
-                            btn = True
+                        try:
+                            if UsersAccessGroup.objects.get(user_id=UsersAll.objects.get(
+                                    login=searching_users[0]["login"]).user_id).group_id == 2:
+                                btn = True
+                        except:
+                            pass
                 else:
                     error = "За такими данними користувача не знайдено."
 
