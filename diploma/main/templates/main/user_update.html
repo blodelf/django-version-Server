@@ -3,11 +3,11 @@
 
 
 {% block title %}
-    {% if only_view %}
-        Моя сторінка
-    {% else %}
-        Cторінка редагування користувача
-    {% endif %}
+{% if only_view %}
+Моя сторінка
+{% else %}
+Cторінка редагування користувача
+{% endif %}
 {% endblock %}
 
 
@@ -181,17 +181,16 @@ width: 50%!important;
             </div>
             {% endif %}
         </div>
-        
+
         <div class="d-flex justify-content-center mt-3 mb-5">
             {% if only_view != True %}
-                <button class="btn btn-success" type="submit">Зберегти</button>
+            <button class="btn btn-success" type="submit">Зберегти</button>
             {% else %}
             <a href="{% url 'user-update' get_user.user_id %}" class="btn badge-dark">Редагувати</a>
             {% endif %}
         </div>
-        
-            
-        
+
+
     </form>
 </div>
 {% endblock %}
@@ -202,6 +201,7 @@ width: 50%!important;
     autoclose: true,
     todayHighlight: true
 });
+
 
 </script>
 {% endblock %}

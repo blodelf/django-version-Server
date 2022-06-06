@@ -117,6 +117,7 @@ div.alert p.h4{
     font-size:12px;
 }
 
+
     </style>
 </head>
 <body>
@@ -124,6 +125,9 @@ div.alert p.h4{
     <form method="post" autocomplete="off">
         {% csrf_token %}
         <div class="d-flex flex-column justify-content-center align-content-center h-100">
+            <div>
+                <h1 class="h1 text-center mb-5 alert-light p-2 mt-2">Вхід до системи</h1>
+            </div>
             <div class="form-add input-container">
                 {{ form.login }}
                 <label>Логін</label>

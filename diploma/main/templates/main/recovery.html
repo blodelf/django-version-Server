@@ -118,14 +118,19 @@ div.alert p.h4{
 
 
 
+
+
     </style>
 </head>
 <body>
 <main class="d-flex justify-content-center align-content-center register">
     <div class="main-content d-flex flex-column">
+        <div>
+            <h1 class="h1 text-center mb-3 alert-light p-2 mt-2">Сторінка зміни паролю</h1>
+        </div>
         <form method="post" autocomplete="off">
             {% csrf_token %}
-            <div class="d-flex alert alert-secondary m-0 mt-5 pt-5">
+            <div class="d-flex alert alert-secondary m-0 mt-3 pt-5">
                 <div class="w-25">
                     <p class="h4 text-light p-2">Пароль</p>
                 </div>
