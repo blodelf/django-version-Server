@@ -205,14 +205,21 @@ def register(request):
                                     else:
                                         error = "Введіть коректний імейл"
 
-            req_params = ['login', 'document_id', 'lname', 'fname', 'mname', 'email']
+            req_params = {
+                'login': 'Логін',
+                'document_id': 'Номер документа',
+                'lname': 'Прізвище',
+                'fname': "Ім`я",
+                'mname': "По батькові",
+                'email': "Імейл"
+            }
             tables = []
-            for i in req_params:
+            for i in req_params.keys():
                 if form.data[i] == '':
-                    tables.append(i)
+                    tables.append(req_params[i])
 
             if error == "":
-                error = "Ви не заповнили " + '/'.join(tables)
+                error = "Ви не заповнили " + ', '.join(tables)
             _mutable = form.data._mutable
             form.data._mutable = True
             form.data["exp_date"] = ""
@@ -247,52 +254,56 @@ def find(request):
         searching_users = []
         if request.method == "POST":
             form = userAllForm(request.POST)
-            if (form.data["fname"] != "" or form.data["login"] != "" or form.data["document_id"] != ""
-                    or form.data["lname"] != "" or form.data["mname"] != "" or form.data["email"] != ""):
-                if int(request.COOKIES.get('iqlvl')) == 2:
-                    users = UsersAll.search_all(
-                        UsersAll.objects.filter(fname__icontains=form.data["fname"].encode('cp1251').decode('latin-1'))
-                            .filter(login__icontains=form.data["login"])
-                            .filter(document_id__icontains=form.data["document_id"])
-                            .filter(lname__icontains=form.data["lname"].encode('cp1251').decode('latin-1'))
-                            .filter(mname__icontains=form.data["mname"].encode('cp1251').decode('latin-1'))
-                            .filter(email__icontains=form.data["email"])
-                            .filter(dept_id=UsersAll.objects.get(login=request.COOKIES.get('username')).dept_id))
-                else:
-                    users = UsersAll.search_all(
-                        UsersAll.objects.filter(fname__icontains=form.data["fname"].encode('cp1251').decode('latin-1'))
-                            .filter(login__icontains=form.data["login"])
-                            .filter(document_id__icontains=form.data["document_id"])
-                            .filter(lname__icontains=form.data["lname"].encode('cp1251').decode('latin-1'))
-                            .filter(mname__icontains=form.data["mname"].encode('cp1251').decode('latin-1'))
-                            .filter(email__icontains=form.data["email"]))
-                if users != []:
-                    if (len(users) > 5):
-                        searching_users = []
-                        error = "Уточніть запит"
+            try:
+                if (form.data["fname"] != "" or form.data["login"] != "" or form.data["document_id"] != ""
+                        or form.data["lname"] != "" or form.data["mname"] != "" or form.data["email"] != ""):
+                    if int(request.COOKIES.get('iqlvl')) == 2:
+                        users = UsersAll.search_all(
+                            UsersAll.objects.filter(
+                                fname__icontains=form.data["fname"].encode('cp1251').decode('latin-1'))
+                                .filter(login__icontains=form.data["login"])
+                                .filter(document_id__icontains=form.data["document_id"])
+                                .filter(lname__icontains=form.data["lname"].encode('cp1251').decode('latin-1'))
+                                .filter(mname__icontains=form.data["mname"].encode('cp1251').decode('latin-1'))
+                                .filter(email__icontains=form.data["email"])
+                                .filter(dept_id=UsersAll.objects.get(login=request.COOKIES.get('username')).dept_id))
                     else:
-                        for i in range(0, len(users)):
-                            for el in users[i].keys():
-                                if isinstance(users[i][el], str):
-                                    users[i][el] = users[i][el].encode('latin-1').decode('cp1251')
-                        info_show = True
-                        for el in users:
-                            el["dept_id"] = DeptAll.objects.get(dept_id=el["dept_id"])
-                            searching_users.append(el)
+                        users = UsersAll.search_all(
+                            UsersAll.objects.filter(
+                                fname__icontains=form.data["fname"].encode('cp1251').decode('latin-1'))
+                                .filter(login__icontains=form.data["login"])
+                                .filter(document_id__icontains=form.data["document_id"])
+                                .filter(lname__icontains=form.data["lname"].encode('cp1251').decode('latin-1'))
+                                .filter(mname__icontains=form.data["mname"].encode('cp1251').decode('latin-1'))
+                                .filter(email__icontains=form.data["email"]))
+                    if users != []:
+                        if (len(users) > 5):
+                            searching_users = []
+                            error = "Уточніть запит"
+                        else:
+                            for i in range(0, len(users)):
+                                for el in users[i].keys():
+                                    if isinstance(users[i][el], str):
+                                        users[i][el] = users[i][el].encode('latin-1').decode('cp1251')
+                            info_show = True
+                            for el in users:
+                                el["dept_id"] = DeptAll.objects.get(dept_id=el["dept_id"])
+                                searching_users.append(el)
+                    else:
+                        error = "За такими данними користувача не знайдено."
+                    data = {
+                        'form': form,
+                        'info': searching_users,
+                        'error': error,
+                        'lvl': int(request.COOKIES.get('iqlvl')),
+                        'show': info_show
+                    }
+                    return create_cookies(request, request.COOKIES.get('iqlvl'), request.COOKIES.get('username'),
+                                          'main/userfind.html', data)
                 else:
-                    error = "За такими данними користувача не знайдено."
-                data = {
-                    'form': form,
-                    'info': searching_users,
-                    'error': error,
-                    'lvl': int(request.COOKIES.get('iqlvl')),
-                    'show': info_show
-                }
-                return create_cookies(request, request.COOKIES.get('iqlvl'), request.COOKIES.get('username'),
-                                      'main/userfind.html', data)
-            else:
-                error = "Уведіть хоча б один із пунктів для пошуку"
-
+                    error = "Уведіть хоча б один із пунктів для пошуку"
+            except:
+                error = "Ви ввели недопустимі символи"
         form = userAllForm()
         data = {
             'form': form,
@@ -1041,7 +1052,7 @@ def accesstovpn(request):
             'info': error,
             'base_template': base_template,
             'groupVPN': groupVPN,
-            'groupNOC': groupNOC
+            'groupNOC': groupNOC,
         }
         return create_cookies(request, request.COOKIES.get('iqlvl'), request.COOKIES.get('username'),
                               template, context)
@@ -1111,7 +1122,8 @@ def addtovpn(request):
                     'info': searching_users,
                     'error': error,
                     'show': info_show,
-                    'btn': btn
+                    'btn': btn,
+                    'vpn': 'VPN'
                 }
                 return create_cookies(request, request.COOKIES.get('iqlvl'), request.COOKIES.get('username'),
                                       'main/addtoVPN.html', data)
@@ -1125,7 +1137,8 @@ def addtovpn(request):
             'info': users,
             'error': error,
             'show': info_show,
-            'btn': btn
+            'btn': btn,
+            'vpn':'VPN'
         }
         return create_cookies(request, request.COOKIES.get('iqlvl'), request.COOKIES.get('username'),
                               'main/addtoVPN.html', data)
@@ -1195,7 +1208,8 @@ def addtovpn_noc(request):
                     'lvl': int(request.COOKIES.get('iqlvl')),
                     'error': error,
                     'show': info_show,
-                    'btn': btn
+                    'btn': btn,
+                    'vpn': 'VPN-NOC'
                 }
                 return create_cookies(request, request.COOKIES.get('iqlvl'), request.COOKIES.get('username'),
                                       'main/addtoVPN.html', data)
@@ -1209,7 +1223,8 @@ def addtovpn_noc(request):
             'lvl': int(request.COOKIES.get('iqlvl')),
             'error': error,
             'show': info_show,
-            'btn': btn
+            'btn': btn,
+            'vpn': 'VPN-NOC'
         }
         return create_cookies(request, request.COOKIES.get('iqlvl'), request.COOKIES.get('username'),
                               'main/addtoVPN.html', data)
