@@ -422,7 +422,7 @@ def change_own_pass(request):
                     history.save()
                     user.save(update_fields=['passwd'])
                 else:
-                    success = "У паролі повинно бути хоча б 8 символів."
+                    success = "Мінімальна довжина паролю 8 символів."
             else:
                 success = "Паролі не співпадають."
         form = change_passForm()
@@ -461,7 +461,7 @@ def changeownpassuser(request):
                     history.save()
                     user.save(update_fields=['passwd'])
                 else:
-                    success = "У паролі повинно бути хоча б 8 символів."
+                    success = "Мінімальна довжина паролю 8 символів."
             else:
                 success = "Паролі не співпадають"
         form = change_passForm()
@@ -752,6 +752,7 @@ def UserUpdateView(request, pk):
         infoAboutUser = UsersAll.show_all(UsersAll.objects.filter(login=get_user.login))[0]
         infoAboutUser["dept_id"] = DeptAll.objects.get(pk=infoAboutUser["dept_id"])
         infoAboutUser["title_id"] = TitleAll.objects.get(pk=infoAboutUser["title_id"])
+        infoAboutUser["exp_date"] = infoAboutUser["exp_date"].strftime("%d-%m-%Y")
         if request.method == "POST":
             changes = []
             form = userAllForm(request.POST)
@@ -983,6 +984,10 @@ def HistoryView(request, pk):
             and int(request.COOKIES.get('iqlvl')) >= 2:
         template = 'main/all_history.html'
         get_user = UsersHistory.objects.get(pk=pk)
+        get_user.date = get_user.date.strftime("%d-%m-%Y")
+        if get_user.reason != None:
+            get_user.reason = "\t".join(get_user.reason.split("'"))
+
         context = {
             'get_user': get_user,
             'lvl': int(request.COOKIES.get('iqlvl'))
@@ -1009,6 +1014,7 @@ def mypage(request):
         infoAboutUser = UsersAll.show_all(UsersAll.objects.filter(login=get_user.login))[0]
         infoAboutUser["dept_id"] = DeptAll.objects.get(pk=infoAboutUser["dept_id"])
         infoAboutUser["title_id"] = TitleAll.objects.get(pk=infoAboutUser["title_id"])
+        infoAboutUser["exp_date"] = infoAboutUser["exp_date"].strftime("%d-%m-%Y")
         form = userAllForm()
         context = {
             'get_user': get_user,
@@ -1255,7 +1261,7 @@ def recoverypass(request, code):
                     user.save(update_fields=['passwd'])
                     return redirect('login')
                 else:
-                    success = "У паролі повинно бути хоча б 8 символів."
+                    success = "Мінімальна довжина паролю 8 символів."
             else:
                 success = "Паролі не співпадають"
         else:
