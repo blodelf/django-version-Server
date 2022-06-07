@@ -301,7 +301,7 @@ def find(request):
                     return create_cookies(request, request.COOKIES.get('iqlvl'), request.COOKIES.get('username'),
                                           'main/userfind.html', data)
                 else:
-                    error = "Уведіть хоча б один із пунктів для пошуку"
+                    error = "Введіть хоча б один із пунктів для пошуку"
             except:
                 error = "Ви ввели недопустимі символи"
         form = userAllForm()
@@ -345,9 +345,9 @@ def termlonger(request):
                     else:
                         error = "Дата не може бути за минулий період"
                 else:
-                    error = "Уведіть правильну дату"
+                    error = "Введіть правильну дату"
             else:
-                error = "Уведіть правильний логін"
+                error = "Введіть правильний логін"
         form = userAllForm()
         data = {
             'form': form,
@@ -653,7 +653,7 @@ def remind_password(request):
                 response.set_cookie('testCode', make_password(test_code), expires=datetime.utcnow() + timedelta(minutes=2))
                 return response
         except:
-            pass
+            info = "Ви ввели недопустимі символи"
         form = remindpass()
         data = {
             'form': form,
@@ -720,7 +720,7 @@ def findstuff(request):
                 return create_cookies(request, request.COOKIES.get('iqlvl'), request.COOKIES.get('username'),
                                       'main/userfind_user.html', data)
             else:
-                error = "Уведіть хоча б один із пунктів для пошуку"
+                error = "Введіть хоча б один із пунктів для пошуку"
 
         form = userAllForm()
         data = {
@@ -1137,7 +1137,7 @@ def addtovpn(request):
                 return create_cookies(request, request.COOKIES.get('iqlvl'), request.COOKIES.get('username'),
                                       'main/addtoVPN.html', data)
             else:
-                error = "Уведіть хоча б один із пунктів для пошуку"
+                error = "Введіть хоча б один із пунктів для пошуку"
 
         form = userAllForm()
         data = {
@@ -1223,7 +1223,7 @@ def addtovpn_noc(request):
                 return create_cookies(request, request.COOKIES.get('iqlvl'), request.COOKIES.get('username'),
                                       'main/addtoVPN.html', data)
             else:
-                error = "Уведіть хоча б один із пунктів для пошуку"
+                error = "Введіть хоча б один із пунктів для пошуку"
 
         form = userAllForm()
         data = {
