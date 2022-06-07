@@ -615,7 +615,7 @@ def remind_password(request):
                                 'form': form,
                                 'info': info
                             }
-                            generated_pass = f'127.0.0.1:8000/recovery/{uuid_code}'
+                            generated_pass = f'http://diplom.botcreationlab.com/recovery/{uuid_code}'
                             response = redirect('login')
                             response.set_cookie('timePass', make_password(generated_pass),
                                                 expires=datetime.utcnow() + timedelta(minutes=1))
