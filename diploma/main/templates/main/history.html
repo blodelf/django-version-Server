@@ -6,6 +6,12 @@
 Історія користувача
 {% endblock %}
 
+{% block style %}
+.detail{
+    font-size: 16pt!important;
+}
+{% endblock %}
+
 {% block content %}
 <div class="main-content d-flex flex-column">
     <form method="post" autocomplete="off">
@@ -39,16 +45,6 @@
     {% if show %}
     <div class="pb-3 pb-5">
         <div class="d-flex p-0 userDisplay">
-            <div class="d-flex flex-column p-0">
-                <div class="alert alert-secondary m-0">
-                    <p class="h4 text-light p-2">Перегляд</p>
-                </div>
-                {% for el in info %}
-                <div class="alert alert-secondary m-0 p-1 colout d-flex justify-content-center align-items-center">
-                    <a href="{% url 'history_check' el.id %}" class="text-light p-0 h4">Детальніше</a>
-                </div>
-                {% endfor %}
-            </div>
             <div class="d-flex flex-column p-0">
                 <div class="alert alert-secondary m-0">
                     <p class="h4 text-light p-2">Дата</p>
@@ -96,6 +92,16 @@
                 {% for el in info %}
                 <div class="alert alert-secondary m-0 p-3 colout">
                     <p class="h4 text-light p-2">{{el.ip}}</p>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="d-flex flex-column p-0">
+                <div class="alert alert-secondary m-0">
+                    <p class="h4 text-light p-2">Перегляд</p>
+                </div>
+                {% for el in info %}
+                <div class="alert alert-secondary m-0 p-1 colout d-flex justify-content-center align-items-center">
+                    <a href="{% url 'history_check' el.id %}" class="btn btn-light p-0 detail">Детальніше</a>
                 </div>
                 {% endfor %}
             </div>

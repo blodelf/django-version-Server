@@ -192,7 +192,7 @@ def register(request):
                                                     UsersAll.objects.filter(login=form.data["login"]))
                                                 history = UsersHistory()
                                                 history.user_id = user[0]['id']
-                                                history.date = datetime.now()
+                                                history.date = datetime.now().date()
                                                 history.action = "CREATION"
                                                 history.creator = request.COOKIES.get('username')
                                                 history.ip = get_client_ip(request)
@@ -499,7 +499,7 @@ def history(request):
                         if (idOfuser == el.user_id):
                             if el.reason != None:
                                 if len(el.reason) > 50:
-                                    el.reason = "Дивись детальніше"
+                                    el.reason = el.reason[:47]+"..."
                             info.append({
                                 "date": el.date.strftime("%H:%M %d-%m-%Y"),
                                 "action": el.action,
@@ -598,62 +598,59 @@ def remind_password(request):
     if not check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status')):
         info = ""
         test_code = generateTestCode()
-        try:
-            if request.method == "POST":
-                form = remindpass(request.POST)
-                users = UsersAll.search_all(UsersAll.objects.filter(login=form.data["login"]))
-                login = form.data["login"]
-                id_document = form.data["document_id"]
-                logD = UsersAll.objects.all()
-                if login != "":
-                    for el in logD:
-                        if login == el.login:
-                            if check_password(id_document, request.COOKIES.get('testCode')):
-                                form = userAllForm()
-                                info = "Посилання на відновлення паролю, відправлено на пошту"
-                                uuid_code = uuid.uuid4().hex
-                                data = {
-                                    'form': form,
-                                    'info': info
-                                }
-                                generated_pass = f'http://diplom.botcreationlab.com/recovery/{uuid_code}'
-                                response = redirect('login')
-                                response.set_cookie('timePass', make_password(generated_pass),
-                                                    expires=datetime.utcnow() + timedelta(minutes=1))
-                                recovery_record = RestorePassword()
-                                recovery_record.user = UsersAll.objects.get(login=users[0]['login']).user_id
-                                recovery_record.exp_date = datetime.now() + timedelta(minutes=15)
-                                recovery_record.created_date = datetime.now()
-                                recovery_record.ip = get_client_ip(request)
-                                recovery_record.temporary_pass = uuid_code
-                                recovery_record.save()
+        if request.method == "POST":
+            form = remindpass(request.POST)
+            users = UsersAll.search_all(UsersAll.objects.filter(login=form.data["login"]))
+            login = form.data["login"]
+            id_document = form.data["document_id"]
+            logD = UsersAll.objects.all()
+            if login != "":
+                for el in logD:
+                    if login == el.login:
+                        if check_password(id_document, request.COOKIES.get('testCode')):
+                            form = userAllForm()
+                            info = "Посилання на відновлення паролю, відправлено на пошту"
+                            uuid_code = uuid.uuid4().hex
+                            data = {
+                                'form': form,
+                                'info': info
+                            }
+                            generated_pass = f'http://diplom.botcreationlab.com/recovery/{uuid_code}'
+                            response = redirect('login')
+                            response.set_cookie('timePass', make_password(generated_pass),
+                                                expires=datetime.utcnow() + timedelta(minutes=1))
+                            recovery_record = RestorePassword()
+                            recovery_record.user = UsersAll.objects.get(login=users[0]['login']).user_id
+                            recovery_record.exp_date = datetime.now() + timedelta(minutes=15)
+                            recovery_record.created_date = datetime.now()
+                            recovery_record.ip = get_client_ip(request)
+                            recovery_record.temporary_pass = uuid_code
+                            recovery_record.save()
 
-                                r = requests.get(
-                                    f"https://api.unisender.com/ru/api/sendEmail?format=json&api_key=6q6o8ud7w8sxs67oga6wedpichx4xogxr8x18uqe&email={users[0]['email']}&sender_name=Support&sender_email=botcreationlab@gmail.com&subject=New password .&body=Create new password by this url: {generated_pass}&list_id=1")
+                            r = requests.get(
+                                f"https://api.unisender.com/ru/api/sendEmail?format=json&api_key=6q6o8ud7w8sxs67oga6wedpichx4xogxr8x18uqe&email={users[0]['email']}&sender_name=Support&sender_email=botcreationlab@gmail.com&subject=New password .&body=Create new password by this url: {generated_pass}&list_id=1")
 
-                                return response
-                            else:
-                                info = "Не правильно набраний код."
-                                break
+                            return response
                         else:
-                            info = "Такого логіну не існує."
-                else:
-                    info = "Ви не ввели логін."
-                test_code = generateTestCode()
-                _mutable = form.data._mutable
-                form.data._mutable = True
-                form.data["document_id"] = ""
-                form.data._mutable = _mutable
-                data = {
-                    'form': form,
-                    'info': info,
-                    'test': test_code
-                }
-                response = render(request, 'main/remind_password.html', data)
-                response.set_cookie('testCode', make_password(test_code), expires=datetime.utcnow() + timedelta(minutes=2))
-                return response
-        except:
-            info = "Ви ввели недопустимі символи"
+                            info = "Не правильно набраний код."
+                            break
+                    else:
+                        info = "Такого логіну не існує."
+            else:
+                info = "Ви не ввели логін."
+            test_code = generateTestCode()
+            _mutable = form.data._mutable
+            form.data._mutable = True
+            form.data["document_id"] = ""
+            form.data._mutable = _mutable
+            data = {
+                'form': form,
+                'info': info,
+                'test': test_code
+            }
+            response = render(request, 'main/remind_password.html', data)
+            response.set_cookie('testCode', make_password(test_code), expires=datetime.utcnow() + timedelta(minutes=2))
+            return response
         form = remindpass()
         data = {
             'form': form,
@@ -760,6 +757,7 @@ def UserUpdateView(request, pk):
             changes = []
             form = userAllForm(request.POST)
             prevForm = UsersAll.show_all(UsersAll.objects.filter(login=get_user.login))[0]
+
             _mutable = form.data._mutable
             form.data._mutable = True
             check_email = True
@@ -841,10 +839,10 @@ def UserUpdateView(request, pk):
                 pass
             try:
                 if form.data["exp_date"] != infoAboutUser["exp_date"] and form.data["exp_date"] != "":
-                    changes.append(
-                        f"Exp. date changed from {prevForm['exp_date']} to {form.data['exp_date']}")
                     exp_date_raw = form.data["exp_date"].split('/')
                     form.data["exp_date"] = datetime(int(exp_date_raw[2]), int(exp_date_raw[0]), int(exp_date_raw[1]))
+                    changes.append(
+                        f"Exp. date changed from {prevForm['exp_date'].strftime('%d-%m-%Y')} to {form.data['exp_date'].strftime('%d-%m-%Y')}")
                     prevForm['exp_date'] = form.data["exp_date"]
             except:
                 pass
@@ -989,8 +987,8 @@ def HistoryView(request, pk):
         get_user = UsersHistory.objects.get(pk=pk)
         get_user.date = get_user.date.strftime("%d-%m-%Y")
         if get_user.reason != None:
-            get_user.reason = "\t".join(get_user.reason.split("'"))
-
+            get_user.reason = get_user.reason.replace("[", "").replace("]", "")
+            get_user.reason = get_user.reason.split(",")
         context = {
             'get_user': get_user,
             'lvl': int(request.COOKIES.get('iqlvl'))
