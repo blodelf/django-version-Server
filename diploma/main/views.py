@@ -598,59 +598,62 @@ def remind_password(request):
     if not check_cookies(request.COOKIES.get('username'), request.COOKIES.get('login_status')):
         info = ""
         test_code = generateTestCode()
-        if request.method == "POST":
-            form = remindpass(request.POST)
-            users = UsersAll.search_all(UsersAll.objects.filter(login=form.data["login"]))
-            login = form.data["login"]
-            id_document = form.data["document_id"]
-            logD = UsersAll.objects.all()
-            if login != "":
-                for el in logD:
-                    if login == el.login:
-                        if check_password(id_document, request.COOKIES.get('testCode')):
-                            form = userAllForm()
-                            info = "Посилання на відновлення паролю, відправлено на пошту"
-                            uuid_code = uuid.uuid4().hex
-                            data = {
-                                'form': form,
-                                'info': info
-                            }
-                            generated_pass = f'http://diplom.botcreationlab.com/recovery/{uuid_code}'
-                            response = redirect('login')
-                            response.set_cookie('timePass', make_password(generated_pass),
-                                                expires=datetime.utcnow() + timedelta(minutes=1))
-                            recovery_record = RestorePassword()
-                            recovery_record.user = UsersAll.objects.get(login=users[0]['login']).user_id
-                            recovery_record.exp_date = datetime.now() + timedelta(minutes=15)
-                            recovery_record.created_date = datetime.now()
-                            recovery_record.ip = get_client_ip(request)
-                            recovery_record.temporary_pass = uuid_code
-                            recovery_record.save()
+        try:
+            if request.method == "POST":
+                form = remindpass(request.POST)
+                users = UsersAll.search_all(UsersAll.objects.filter(login=form.data["login"]))
+                login = form.data["login"]
+                id_document = form.data["document_id"]
+                logD = UsersAll.objects.all()
+                if login != "":
+                    for el in logD:
+                        if login == el.login:
+                            if check_password(id_document, request.COOKIES.get('testCode')):
+                                form = userAllForm()
+                                info = "Посилання на відновлення паролю, відправлено на пошту"
+                                uuid_code = uuid.uuid4().hex
+                                data = {
+                                    'form': form,
+                                    'info': info
+                                }
+                                generated_pass = f'http://diplom.botcreationlab.com/recovery/{uuid_code}'
+                                response = redirect('login')
+                                response.set_cookie('timePass', make_password(generated_pass),
+                                                    expires=datetime.utcnow() + timedelta(minutes=1))
+                                recovery_record = RestorePassword()
+                                recovery_record.user = UsersAll.objects.get(login=users[0]['login']).user_id
+                                recovery_record.exp_date = datetime.now() + timedelta(minutes=15)
+                                recovery_record.created_date = datetime.now()
+                                recovery_record.ip = get_client_ip(request)
+                                recovery_record.temporary_pass = uuid_code
+                                recovery_record.save()
 
-                            r = requests.get(
-                                f"https://api.unisender.com/ru/api/sendEmail?format=json&api_key=6q6o8ud7w8sxs67oga6wedpichx4xogxr8x18uqe&email={users[0]['email']}&sender_name=Support&sender_email=botcreationlab@gmail.com&subject=New password .&body=Create new password by this url: {generated_pass}&list_id=1")
+                                r = requests.get(
+                                    f"https://api.unisender.com/ru/api/sendEmail?format=json&api_key=6q6o8ud7w8sxs67oga6wedpichx4xogxr8x18uqe&email={users[0]['email']}&sender_name=Support&sender_email=botcreationlab@gmail.com&subject=New password .&body=Create new password by this url: {generated_pass}&list_id=1")
 
-                            return response
+                                return response
+                            else:
+                                info = "Не правильно набраний код."
+                                break
                         else:
-                            info = "Не правильно набраний код."
-                            break
-                    else:
-                        info = "Такого логіну не існує."
-            else:
-                info = "Ви не ввели логін."
-            test_code = generateTestCode()
-            _mutable = form.data._mutable
-            form.data._mutable = True
-            form.data["document_id"] = ""
-            form.data._mutable = _mutable
-            data = {
-                'form': form,
-                'info': info,
-                'test': test_code
-            }
-            response = render(request, 'main/remind_password.html', data)
-            response.set_cookie('testCode', make_password(test_code), expires=datetime.utcnow() + timedelta(minutes=2))
-            return response
+                            info = "Такого логіну не існує."
+                else:
+                    info = "Ви не ввели логін."
+                test_code = generateTestCode()
+                _mutable = form.data._mutable
+                form.data._mutable = True
+                form.data["document_id"] = ""
+                form.data._mutable = _mutable
+                data = {
+                    'form': form,
+                    'info': info,
+                    'test': test_code
+                }
+                response = render(request, 'main/remind_password.html', data)
+                response.set_cookie('testCode', make_password(test_code), expires=datetime.utcnow() + timedelta(minutes=2))
+                return response
+        except:
+            pass
         form = remindpass()
         data = {
             'form': form,

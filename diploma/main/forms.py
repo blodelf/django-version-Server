@@ -96,8 +96,7 @@ class remindpass(forms.Form):
     login = forms.CharField(label='Login', max_length=100)
     document_id = forms.CharField(label='Login', max_length=100, widget=forms.TextInput(attrs={
         'id': 'document_id',
-        'readonly': 'readonly',
-        'type': 'password'
+        'readonly': 'readonly'
     }))
 
 
