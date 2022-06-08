@@ -158,6 +158,26 @@ div.alert p.h4{
         integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
         crossorigin="anonymous"></script>
 <script src="https://unpkg.com/shards-ui@latest/dist/js/shards.min.js"></script>
+<script>
+    $(document).ready(function() {
+
+        $('.login').bind("change keyup input click", function() {
+            if (this.value.match(/[^A-Za-z0-9_]/g)) {
+                this.value = this.value.replace(/[^A-Za-z0-9_]/g, '');
+            }
+        });
+        $('.document').bind("change keyup input click", function() {
+            if (this.value.match(/[^0-9//]/g)) {
+                this.value = this.value.replace(/[^0-9//]/g, '');
+            }
+        });
+        $('.phone').bind("change keyup input click", function() {
+            if (this.value.match(/[^0-9+]/g)) {
+                this.value = this.value.replace(/[^0-9+]/g, '');
+            }
+        });
+    });
+</script>
 {% block script %}
 {% endblock %}
 </body>

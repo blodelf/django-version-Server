@@ -84,13 +84,13 @@
                 </div>
             </div>
             <div class="d-flex justify-content-center mt-3 pb-3">
-            <span class="btn btn-secondary prev mr-5">Prev</span>
-            <button class="btn btn-success mr-5" type="submit">Додати</button>
-            <span class="btn btn-secondary next">Next</span>
-        </div>
-        <div class="pt-1 mt-1 d-flex flex-column justify-content-center align-items-center">
-            <span class="badge badge-warning h3 w-50">{{ error }}</span>
-        </div>
+                <span class="btn btn-secondary prev mr-5">Prev</span>
+                <button class="btn btn-success mr-5" type="submit">Додати</button>
+                <span class="btn btn-secondary next">Next</span>
+            </div>
+            <div class="pt-1 mt-1 d-flex flex-column justify-content-center align-items-center">
+                <span class="badge badge-warning h3 w-50">{{ error }}</span>
+            </div>
         </div>
 
         <div class="d-none">
@@ -112,6 +112,7 @@
     autoclose: true,
     todayHighlight: true
 });
+
 var form = document.querySelector('.formWithValidation')
 var fields = form.querySelectorAll('#crit')
 count = 0
@@ -137,5 +138,16 @@ $(".prev").click(function(){
     $(".form-add-part1").show();
     $(".form-add-part2").hide();
 })
+
+</script>
+<script>
+var dateControl = document.querySelector('#datepicker-example');
+var today = new Date();
+var dd = String(today.getDate()).padStart(2, '0');
+var mm = String(today.getMonth() + 1).padStart(2, '0');
+var yyyy = String(today.getFullYear() + 4);
+
+today = mm + '/' + dd + '/' + yyyy;
+dateControl.value = today;
 </script>
 {% endblock %}

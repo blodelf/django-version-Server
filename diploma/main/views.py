@@ -21,6 +21,12 @@ def generatePass():
     return passwd
 
 
+def checkForValidUUID():
+    uuidStr = RestorePassword.objects.all()
+    for el in uuidStr:
+        if el.exp_date.strftime("%Y-%m-%d") >= str(datetime.now().date() + timedelta(days=7)):
+            el.delete()
+
 def generateTestCode():
     passwd = ''
     for x in range(5):
@@ -139,9 +145,10 @@ def register(request):
                                         for el in form.data.keys():
                                             if form.data[el] == "":
                                                 form.data[el] = "-"
-                                        form.data._mutable = _mutable
                                         if form.is_valid():
                                             users = UsersAll.objects.filter(login=form.data["login"])
+                                            emails = UsersAll.objects.filter(email=form.data["email"])
+                                            documents = UsersAll.objects.filter(document_id=form.data["document_id"])
                                             id_dept = DeptAll.objects.all()
                                             id_title = TitleAll.objects.all()
                                             dept_number = 1
@@ -158,53 +165,60 @@ def register(request):
                                             form.data._mutable = _mutable
 
                                             if (len(users) == 0):
-                                                formForSave = UsersAll(login=form.cleaned_data["login"],
-                                                                       document_id=form.cleaned_data["document_id"],
-                                                                       contr_quest=form.cleaned_data["contr_quest"],
-                                                                       contr_answ=form.cleaned_data["contr_answ"],
-                                                                       lname=form.cleaned_data["lname"].encode(
-                                                                           'cp1251').decode('latin-1'),
-                                                                       fname=form.cleaned_data["fname"].encode(
-                                                                           'cp1251').decode('latin-1'),
-                                                                       mname=form.cleaned_data["mname"].encode(
-                                                                           'cp1251').decode('latin-1'),
-                                                                       dept_id=dept_number,
-                                                                       title_id=title_number,
-                                                                       title=form.cleaned_data["title"].encode(
-                                                                           'cp1251').decode('latin-1'),
-                                                                       email=form.cleaned_data["email"],
-                                                                       phone=form.cleaned_data["phone"],
-                                                                       welcome_msg=form.cleaned_data["welcome_msg"],
-                                                                       exp_date=form.cleaned_data["exp_date"],
-                                                                       admin_level=form.cleaned_data["admin_level"],
-                                                                       admin=form.cleaned_data["admin"],
-                                                                       mgroup_id=form.cleaned_data["mgroup_id"],
-                                                                       operator=form.cleaned_data["operator"],
-                                                                       state=form.cleaned_data["state"],
-                                                                       creator=form.cleaned_data["creator"],
-                                                                       passwd=form.cleaned_data["passwd"],
-                                                                       )
-                                                formForSave.save()
-                                                r = requests.get(
-                                                    f"https://api.unisender.com/ru/api/sendEmail?format=json&api_key=6q6o8ud7w8sxs67oga6wedpichx4xogxr8x18uqe&email={form.data['email']}&sender_name=Support&sender_email=botcreationlab@gmail.com&subject=Your new password.&body=Your new password: {generated_pass}&list_id=1")
+                                                if (len(documents) == 0):
+                                                    if (len(emails) == 0):
+                                                        formForSave = UsersAll(login=form.cleaned_data["login"],
+                                                                               document_id=form.cleaned_data["document_id"],
+                                                                               contr_quest=form.cleaned_data["contr_quest"],
+                                                                               contr_answ=form.cleaned_data["contr_answ"],
+                                                                               lname=form.cleaned_data["lname"].encode(
+                                                                                   'cp1251').decode('latin-1'),
+                                                                               fname=form.cleaned_data["fname"].encode(
+                                                                                   'cp1251').decode('latin-1'),
+                                                                               mname=form.cleaned_data["mname"].encode(
+                                                                                   'cp1251').decode('latin-1'),
+                                                                               dept_id=dept_number,
+                                                                               title_id=title_number,
+                                                                               title=form.cleaned_data["title"].encode(
+                                                                                   'cp1251').decode('latin-1'),
+                                                                               email=form.cleaned_data["email"],
+                                                                               phone=form.cleaned_data["phone"],
+                                                                               welcome_msg=form.cleaned_data["welcome_msg"],
+                                                                               exp_date=form.cleaned_data["exp_date"],
+                                                                               admin_level=form.cleaned_data["admin_level"],
+                                                                               admin=form.cleaned_data["admin"],
+                                                                               mgroup_id=form.cleaned_data["mgroup_id"],
+                                                                               operator=form.cleaned_data["operator"],
+                                                                               state=form.cleaned_data["state"],
+                                                                               creator=form.cleaned_data["creator"],
+                                                                               passwd=form.cleaned_data["passwd"],
+                                                                               )
+                                                        formForSave.save()
+                                                        r = requests.get(
+                                                            f"https://api.unisender.com/ru/api/sendEmail?format=json&api_key=6q6o8ud7w8sxs67oga6wedpichx4xogxr8x18uqe&email={form.data['email']}&sender_name=Support&sender_email=botcreationlab@gmail.com&subject=Your new password.&body=Your new password: {generated_pass}&list_id=1")
 
-                                                user = UsersAll.search_all(
-                                                    UsersAll.objects.filter(login=form.data["login"]))
-                                                history = UsersHistory()
-                                                history.user_id = user[0]['id']
-                                                history.date = datetime.now().date()
-                                                history.action = "CREATION"
-                                                history.creator = request.COOKIES.get('username')
-                                                history.ip = get_client_ip(request)
-                                                history.save()
-                                                return redirect('home')
+                                                        user = UsersAll.search_all(
+                                                            UsersAll.objects.filter(login=form.data["login"]))
+                                                        history = UsersHistory()
+                                                        history.user_id = user[0]['id']
+                                                        history.date = datetime.now().date()
+                                                        history.action = "CREATION"
+                                                        history.creator = request.COOKIES.get('username')
+                                                        history.ip = get_client_ip(request)
+                                                        history.save()
+                                                        return redirect('home')
+                                                    else:
+                                                        error = "Заповніть ще раз. Такий імейл вже існує."
+                                                else:
+                                                    error = "Заповніть ще раз. Такий номер документа вже існує."
                                             else:
-                                                error = "Заповніть ще раз. Такой логін вже існує."
+                                                error = "Заповніть ще раз. Такий логін вже існує."
                                         else:
                                             error = "Перевірте коректність заповлення форми."
                                     else:
                                         error = "Введіть коректний імейл"
 
+            form.data._mutable = _mutable
             req_params = {
                 'login': 'Логін',
                 'document_id': 'Номер документа',
@@ -220,10 +234,6 @@ def register(request):
 
             if error == "":
                 error = "Ви не заповнили " + ', '.join(tables)
-            _mutable = form.data._mutable
-            form.data._mutable = True
-            form.data["exp_date"] = ""
-            form.data._mutable = _mutable
             data = {
                 'form': form,
                 'lvl': int(request.COOKIES.get('iqlvl')),
@@ -489,10 +499,17 @@ def history(request):
             if (login != ""):
                 logD = UsersAll.objects.all()
                 idOfuser = -1
-                for el in logD:
-                    if (login == el.login):
-                        idOfuser = el.user_id
-                        break
+                if int(request.COOKIES.get('iqlvl')) == 2:
+                    for el in logD:
+                        if (login == el.login
+                                and el.dept_id == UsersAll.objects.get(login=request.COOKIES.get('username')).dept_id):
+                            idOfuser = el.user_id
+                            break
+                else:
+                    for el in logD:
+                        if (login == el.login):
+                            idOfuser = el.user_id
+                            break
                 if (idOfuser != -1):
                     history = UsersHistory.objects.all()
                     for el in history:
@@ -574,10 +591,10 @@ def login(request):
                             info = "Термін дії аккаунту сплив. Зверніться до адміністратора."
                             break
                     else:
-                        info = "Неправильний пароль."
+                        info = "Неправильний логін/пароль."
                         break
                 else:
-                    info = "Такого логіну не існує"
+                    info = "Неправильний логін/пароль."
         form = userAllForm()
         data = {
             'form': form,
@@ -615,10 +632,10 @@ def remind_password(request):
                                 'form': form,
                                 'info': info
                             }
-                            generated_pass = f'http://diplom.botcreationlab.com/recovery/{uuid_code}'
+                            generated_pass = f'127.0.0.1:8000/recovery/{uuid_code}'
                             response = redirect('login')
                             response.set_cookie('timePass', make_password(generated_pass),
-                                                expires=datetime.utcnow() + timedelta(minutes=1))
+                                                expires=datetime.utcnow() + timedelta(minutes=2))
                             recovery_record = RestorePassword()
                             recovery_record.user = UsersAll.objects.get(login=users[0]['login']).user_id
                             recovery_record.exp_date = datetime.now() + timedelta(minutes=15)
@@ -688,9 +705,9 @@ def findstuff(request):
                     or form.data["email"] != ""):
                 users = UsersAll.search_all(UsersAll.objects.exclude(admin_level=1)
                                             .exclude(admin_level=0)
-                                            .filter(fname__icontains=form.data["fname"])
-                                            .filter(lname__icontains=form.data["lname"])
-                                            .filter(mname__icontains=form.data["mname"])
+                                            .filter(fname__icontains=form.data["fname"].encode('cp1251').decode('latin-1'))
+                                            .filter(lname__icontains=form.data["lname"].encode('cp1251').decode('latin-1'))
+                                            .filter(mname__icontains=form.data["mname"].encode('cp1251').decode('latin-1'))
                                             .filter(email__icontains=form.data["email"]))
                 if users != []:
                     if (len(users) > 5):
@@ -1240,37 +1257,41 @@ def addtovpn_noc(request):
 
 
 def recoverypass(request, code):
-    success = ""
-    if request.method == "POST":
-        form = change_passForm(request.POST)
-        users = RestorePassword.objects.get(temporary_pass=code)
-        if users.exp_date > datetime.now():
-            if (form.data["password"] == form.data["repassword"]):
-                if (len(form.data["password"]) >= 8):
-                    password = form.data["password"]
-                    password = hashMDPass(password)
-                    user = UsersAll(user_id=users.user)
-                    user.passwd = password
-                    history = UsersHistory()
-                    history.user_id = users.user
-                    history.date = datetime.now()
-                    history.action = "CHPASS"
-                    history.creator = UsersAll.objects.get(user_id=users.user).login
-                    history.ip = get_client_ip(request)
-                    history.reason = "Recover password"
-                    history.save()
-                    user.save(update_fields=['passwd'])
-                    return redirect('login')
+    if RestorePassword.objects.filter(temporary_pass=code):
+        checkForValidUUID()
+        success = ""
+        if request.method == "POST":
+            form = change_passForm(request.POST)
+            users = RestorePassword.objects.get(temporary_pass=code)
+            if users.exp_date > datetime.now():
+                if (form.data["password"] == form.data["repassword"]):
+                    if (len(form.data["password"]) >= 8):
+                        password = form.data["password"]
+                        password = hashMDPass(password)
+                        user = UsersAll(user_id=users.user)
+                        user.passwd = password
+                        history = UsersHistory()
+                        history.user_id = users.user
+                        history.date = datetime.now()
+                        history.action = "CHPASS"
+                        history.creator = UsersAll.objects.get(user_id=users.user).login
+                        history.ip = get_client_ip(request)
+                        history.reason = "Recover password"
+                        history.save()
+                        user.save(update_fields=['passwd'])
+                        return redirect('login')
+                    else:
+                        success = "Мінімальна довжина паролю 8 символів."
                 else:
-                    success = "Мінімальна довжина паролю 8 символів."
+                    success = "Паролі не співпадають"
             else:
-                success = "Паролі не співпадають"
-        else:
-            success = "Час зміни паролю сплив"
+                success = "Час зміни паролю сплив"
 
-    form = change_passForm()
-    data = {
-        'form': form,
-        "success": success
-    }
-    return render(request, 'main/recovery.html', data)
+        form = change_passForm()
+        data = {
+            'form': form,
+            "success": success
+        }
+        return render(request, 'main/recovery.html', data)
+    else:
+        return delete_cookies()

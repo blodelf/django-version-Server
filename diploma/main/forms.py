@@ -14,7 +14,8 @@ class userAllForm(forms.Form):
     login = forms.CharField(max_length=16, widget=forms.TextInput(
         attrs={
             'required': False,
-            'id': "crit"
+            'id': "crit",
+            'class': 'login'
         }))
     passwd = forms.CharField(max_length=40, widget=forms.PasswordInput)
     fname = forms.CharField(max_length=50, widget=forms.TextInput(
@@ -51,7 +52,8 @@ class userAllForm(forms.Form):
         }))
     phone = forms.CharField(max_length=20, widget=forms.TextInput(
         attrs={
-            'required': False
+            'required': False,
+            'class': 'phone'
         }))
     exp_date = forms.DateTimeField(widget=forms.PasswordInput(
         attrs={
@@ -71,7 +73,8 @@ class userAllForm(forms.Form):
     document_id = forms.CharField(max_length=16, widget=forms.TextInput(
         attrs={
             'required': False,
-            'id': "crit"
+            'id': "crit",
+            'class': 'document'
         }))
     creator = forms.CharField(max_length=16, widget=forms.TextInput(
         attrs={
